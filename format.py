@@ -1,57 +1,67 @@
-import pandas
+from pandas import *
 import math
+import csv
 colnames = ['Year'
-            ,'Product line'
-            ,'Product type'
+            ,'Productline'
+            ,'Producttype'
             ,'Product'
-            ,'Order method type'
-            ,'Retailer country'
+            ,'Ordermethodtype'
+            ,'Retailercountry'
             ,'Revenue'
-            ,'Planned revenue'
-            ,'Product cost'
+            ,'Plannedrevenue'
+            ,'Productcost'
             ,'Quantity'
-            ,'Unit cost'
-            ,'Unit price'
-            ,'Gross profit'
+            ,'Unitcost'
+            ,'Unitprice'
+            ,'Grossprofit'
             ,'UnitSalePrice'
             ]
-print(colnames[2])
-data = pandas.read_csv('Book1.csv', names=colnames)
+df = read_csv('Book1.csv', names=colnames)
+data = df
+dataList = df.values.tolist()
 #column name is Unit Sale Price
-unitPrice = data.UnitSalePrice
 #iterate through every row in the unitPrice column
 total = ''
-list = []
-for p in unitPrice:
-    #check to see if the value is a number or not
-    try:
-        #cast the number to a float
-        p = float(p)
-        #if nan(not a number) pass
-        if(math.isnan(p)):
-            list.append(str(0))
-            print(0)
+list = [[0 for x in range(len(colnames))]for y in range(len(dataList[0]))]
+
+for i in range(len(colnames)):
+    for x in range(len(dataList[i])):
+        #check to see if the value is a number or not
+        p = dataList[i][x]
+
+        try:
+            #cast the number to a float
+            p = float(p)
+            #if nan(not a number) pass
+            if(math.isnan(p)):
+                list[i][x] = str(0)
+                print(0)
+                pass
+            else:
+                rounded = p
+                #round to 1 decimal place
+                rounded = round(rounded, 1)
+                #print(i)
+                list[i][x] = str(rounded)
+                total +=str(rounded)
+                #print(str(rounded))
+        except ValueError:
+            list[i][x] = p 
             pass
-        else:
-            rounded = p
-            #round to 1 decimal place
-            rounded = round(rounded, 1)
-            list.append(str(rounded))
-            total +=str(rounded)
-            print(str(rounded))
-    except ValueError:
-        pass
 #print the list
-print(list)
+#print(list)
 x = len(list)
+
 format = ''
 #add the list to a csv file called test
-with open('test.csv','wb') as file:
+
+with open('test.csv','w', encoding = 'utf8') as csvfile:
     for i in range(0, x):
-        print(i)
-        file.write(list[i].encode())
-        file.write('\n'.encode())
-        
+        print(list[i])
+        for counter in range(0, len(list[i])):
+            csvfile.write(list[i][counter])
+            csvfile.write(',')
+        csvfile.write('\n')
             
         
 
