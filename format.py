@@ -1,7 +1,7 @@
 from pandas import *
 import math
 
-df = read_csv('poly_item_data.csv')
+df = read_csv('WMBARR_DATA.csv')
 data = df
 dataList = df.values.tolist()
 #column name is Unit Sale Price
@@ -35,7 +35,7 @@ for i in range(len(dataList)):
 x = len(list)
 format = ''
 #add the list to a csv file called test
-with open('test2.csv','w', encoding = 'utf8') as csvfile:
+with open('OUTPUT.csv','w', encoding = 'utf8') as csvfile:
     for i in range(0, x):
         for counter in range(0, len(list[i])):
             csvfile.write(str(list[i][counter]))
@@ -43,6 +43,3 @@ with open('test2.csv','w', encoding = 'utf8') as csvfile:
             csvfile.write(',')
         #seperate 
         csvfile.write('\n')
-            
-        
-
