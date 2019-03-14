@@ -4,6 +4,18 @@ from tkinter import filedialog
 import os
 from pandas import *
 import math
+import sys
+
+#For email functionality
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import os.path
+
+#For secure password retrieval
+import getpass
 
 root = Tk()
 root.geometry("500x300")
@@ -208,4 +220,35 @@ omColumnMenu.pack(side=RIGHT)
 
 root.mainloop()
 
+#email the output file
+shouldEmail = input("Would you like to email this file? (Y/N): ")
+if (shouldEmail == "Y" or shouldEmail == "y"):
+    email = input("Enter your email address: ")
+    password = getpass.getpass("Enter password: ")
+    sendEmail = input("Enter target email address: ")
+    subject = input("Enter email subject: ")
+    message = input("Enter email message: ")
+    file_location = os.path.join(sys.path[0], "test1.csv")
+    
+    msg = MIMEMultipart()
+    msg['From'] = email
+    msg['To'] = sendEmail
+    msg['Subject'] = subject
 
+    msg.attach(MIMEText(message, 'plain'))
+
+    filename = os.path.basename(file_location)
+    attachment = open(file_location, "rb")
+    part = MIMEBase("application", "octet-stream")
+    part.set_payload((attachment).read())
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition", "attachment; filename= %s" % filename)
+
+    msg.attach(part)
+
+    server = smtplib.SMTP('smtp-mail.outlook.com', 587)
+    server.starttls()
+    server.login(email, password)
+    text = msg.as_string()
+    server.sendmail(email, sendEmail, text)
+    server.quit()
