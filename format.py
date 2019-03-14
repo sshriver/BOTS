@@ -64,7 +64,7 @@ def rfrsh():
 
 def populateOptionMenu(dataList, data):
    
-
+    #function to populate the option menu with check boxes from the 
     for i in range(len(dataList[0])):
         var = IntVar()
         varChecked.append(var)
@@ -72,18 +72,24 @@ def populateOptionMenu(dataList, data):
     #varColumnNames.set(columnNames)
 
 def clearOptionMenu():
+    global varChecked
+    print("------")
     for i in range (data.shape[1]):
+        varChecked = []
         omColumnMenu['menu'].delete(0)
     
 def test():
-    fp = filedialog.askdirectory()
-    print(fp)
+    #fp = filedialog.askdirectory()
+    pwBox = Entry(frameBottom, show="*", width=15)
+    pwBox.pack()
+    print(len(varChecked))
     #for i in range(len(dataList[0])):       
      #  print(i, " : ", varChecked[i].get())
     #print(varColumnNames.get())
     #selectAll()
 
 def populateList():
+    #function to populate the list variable with values from CSV
     global list
     for i in range(len(dataList)):
         for x in range(len(dataList[i])):
@@ -91,11 +97,13 @@ def populateList():
 def formatData():
     global list
     global x
+    #try catch to see if you actually have a file
     try:
         for i in range(len(dataList)):
             for x in range(len(dataList[i])):
                 p = dataList[i][x]
                 #check to see if the column was selected
+                #if column is selected to format
                 if(varChecked[x].get() == 1):               
                     try:
                         #check to see if the value is a number or not
@@ -170,7 +178,7 @@ frameBottom.pack(side=TOP)
 btnImport = Button(topFrame, text = "import", command=openFile)
 btnImport.pack(side = RIGHT)
 
-btnTest = Button(frameBottom, text = "test", command=saveFile)
+btnTest = Button(frameBottom, text = "Save", command=test)
 btnTest.pack(side=TOP)
 
 btnFormat = Button(frameMiddle, text = "Format", command=formatData)
