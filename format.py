@@ -23,11 +23,14 @@ root.geometry("500x300")
 #strvars
 varImportFile = StringVar()
 varColumnNames = StringVar()
+varFormatTypes = StringVar()
 varImportError = StringVar()
 varSaveError = StringVar()
 varSaveError.set(" ")
 varImportError.set("Please select a valid file type(CSV)")
 varChecked = []
+state = 0
+
 
 dataList = None
 data = None
@@ -92,6 +95,7 @@ def clearOptionMenu():
     
 def test():
     #fp = filedialog.askdirectory()
+    print(varFormatTypes.get())
     pwBox = Entry(frameBottom, show="*", width=15)
     pwBox.pack()
     print(len(varChecked))
@@ -107,6 +111,8 @@ def populateList():
         for x in range(len(dataList[i])):
             list[i][x] = str(dataList[i][x])
 def formatData():
+    returnFile()
+    print(state)
     global list
     global x
     #try catch to see if you actually have a file
@@ -116,23 +122,42 @@ def formatData():
                 p = dataList[i][x]
                 #check to see if the column was selected
                 #if column is selected to format
-                if(varChecked[x].get() == 1):               
-                    try:
-                        #check to see if the value is a number or not
-                        p = float(p)
-                        #if nan(not a number) pass
-                        if(math.isnan(p)):
-                            list[i][x] = str(0)
+                if(varChecked[x].get() == 1):
+                    if(state <3 ):
+                        #state is less then 3 this means its formatting for a number.
+                        #state 0 = rounding
+                        #state 1 = C to F(temp)
+                        #state 2 = F to C(temp)
+
+                        try:
+                            #check to see if the value is a number or not
+                            p = float(p)
+                            #if nan(not a number) pass
+                            if(math.isnan(p)):
+                                list[i][x] = str(0)
+                                pass
+                            else:
+                                if(state == 0):                                   
+                                    rounded = p
+                                    #round to 1 decimal place
+                                    rounded = round(rounded, 1)
+                                    list[i][x] = str(rounded)
+                                    #print(str(rounded))
+                                
+                                elif(state ==1):
+                                    temp = p * (9/5) + 32
+                                    list[i][x] = str(temp)
+                                    pass
+                                elif(state ==2):
+                                    temp = (p - 32) * (5/9)
+                                    list[i][x] = str(temp)
+                                    pass
+                                else:
+                                    pass
+                        except ValueError:
+                            list[i][x] = p
                             pass
-                        else:
-                            rounded = p
-                            #round to 1 decimal place
-                            rounded = round(rounded, 1)
-                            list[i][x] = str(rounded)
-                            #print(str(rounded))
-                    except ValueError:
-                        list[i][x] = p
-                        pass
+                        
                 else:
                     pass
         x = len(list)
@@ -140,7 +165,15 @@ def formatData():
     except:
         varImportError.set("Please select a valid file type(CSV) first")
     
-
+def returnFile():
+    global state
+    if(varFormatTypes.get()== "        Round to 2 decimals      "):
+        state = 0
+    elif(varFormatTypes.get() == "Convert Celius to Fahrenheit"):
+        state = 1
+    elif(varFormatTypes.get() == "         Convert Fahrenheit       "):
+        state = 2
+        
 def saveFile():
     global dataList
     if (dataList == None):
@@ -159,6 +192,8 @@ def saveFile():
                         csvfile.write(',')
                     #seperate
                     csvfile.write('\n')
+                csvfile.close()
+            emailClient()
         except:
             varSaveError.set("File name currently open please close before saving")
 def selectAll():
@@ -172,7 +207,14 @@ def deselectAll():
 columnNames = [
     "Columns"
     ]
+formatTypes = [
+    "        Round to 2 decimals      ",
+    "Convert Celius to Fahrenheit",
+    "Convert Fahrenheit to Celius"
+    ]
 varColumnNames.set(columnNames[0])
+varFormatTypes.set(formatTypes[0])
+
 #frames
 topFrame = Frame(root)
 topFrame.pack(side=TOP)
@@ -190,7 +232,7 @@ frameBottom.pack(side=TOP)
 btnImport = Button(topFrame, text = "import", command=openFile)
 btnImport.pack(side = RIGHT)
 
-btnTest = Button(frameBottom, text = "Save", command=test)
+btnTest = Button(frameBottom, text = "Save", command=saveFile)
 btnTest.pack(side=TOP)
 
 btnFormat = Button(frameMiddle, text = "Format", command=formatData)
@@ -216,39 +258,43 @@ lblSaveFileName.pack(side=TOP)
 omColumnMenu = OptionMenu(frameMiddle, varColumnNames, *columnNames)
 #omColumnMenu['menu'].add_command(label="Select all", command = selectAll)
 
+
+omFormatMenu = OptionMenu(frameMiddle, varFormatTypes, *formatTypes)
+omFormatMenu.pack(side=RIGHT)
 omColumnMenu.pack(side=RIGHT)
 
-root.mainloop()
 
 #email the output file
-shouldEmail = input("Would you like to email this file? (Y/N): ")
-if (shouldEmail == "Y" or shouldEmail == "y"):
-    email = input("Enter your email address: ")
-    password = getpass.getpass("Enter password: ")
-    sendEmail = input("Enter target email address: ")
-    subject = input("Enter email subject: ")
-    message = input("Enter email message: ")
-    file_location = os.path.join(sys.path[0], "test1.csv")
-    
-    msg = MIMEMultipart()
-    msg['From'] = email
-    msg['To'] = sendEmail
-    msg['Subject'] = subject
+def emailClient():
+    shouldEmail = input("Would you like to email this file? (Y/N): ")
+    if (shouldEmail == "Y" or shouldEmail == "y"):
+        email = input("Enter your email address: ")
+        password = getpass.getpass("Enter password: ")
+        sendEmail = input("Enter target email address: ")
+        subject = input("Enter email subject: ")
+        message = input("Enter email message: ")
+        file_location = os.path.join(sys.path[0], "test2.csv")
+        
+        msg = MIMEMultipart()
+        msg['From'] = email
+        msg['To'] = sendEmail
+        msg['Subject'] = subject
 
-    msg.attach(MIMEText(message, 'plain'))
+        msg.attach(MIMEText(message, 'plain'))
 
-    filename = os.path.basename(file_location)
-    attachment = open(file_location, "rb")
-    part = MIMEBase("application", "octet-stream")
-    part.set_payload((attachment).read())
-    encoders.encode_base64(part)
-    part.add_header("Content-Disposition", "attachment; filename= %s" % filename)
+        filename = os.path.basename(file_location)
+        attachment = open(file_location, "rb")
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload((attachment).read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", "attachment; filename= %s" % filename)
 
-    msg.attach(part)
+        msg.attach(part)
 
-    server = smtplib.SMTP('smtp-mail.outlook.com', 587)
-    server.starttls()
-    server.login(email, password)
-    text = msg.as_string()
-    server.sendmail(email, sendEmail, text)
+        server = smtplib.SMTP('smtp-mail.outlook.com', 587)
+        server.starttls()
+        server.login(email, password)
+        text = msg.as_string()
+        server.sendmail(email, sendEmail, text)
     server.quit()
+root.mainloop()
