@@ -91,46 +91,56 @@ def populateList():
 def formatData():
     global list
     global x
-    print(len(dataList[1]))
-    for i in range(len(dataList)):
-        for x in range(len(dataList[i])):
-            p = dataList[i][x]
-            #check to see if the column was selected
-            if(varChecked[x].get() == 1):               
-                try:
-                    #check to see if the value is a number or not
-                    p = float(p)
-                    #if nan(not a number) pass
-                    if(math.isnan(p)):
-                        list[i][x] = str(0)
+    try:
+        for i in range(len(dataList)):
+            for x in range(len(dataList[i])):
+                p = dataList[i][x]
+                #check to see if the column was selected
+                if(varChecked[x].get() == 1):               
+                    try:
+                        #check to see if the value is a number or not
+                        p = float(p)
+                        #if nan(not a number) pass
+                        if(math.isnan(p)):
+                            list[i][x] = str(0)
+                            pass
+                        else:
+                            rounded = p
+                            #round to 1 decimal place
+                            rounded = round(rounded, 1)
+                            list[i][x] = str(rounded)
+                            #print(str(rounded))
+                    except ValueError:
+                        list[i][x] = p
                         pass
-                    else:
-                        rounded = p
-                        #round to 1 decimal place
-                        rounded = round(rounded, 1)
-                        list[i][x] = str(rounded)
-                        #print(str(rounded))
-                except ValueError:
-                    list[i][x] = p
+                else:
                     pass
-            else:
-                pass
-    x = len(list)
+        x = len(list)
+        varSaveError.set("File successfully formated")
+    except:
+        varImportError.set("Please select a valid file type(CSV) first")
+    
 
 def saveFile():
+    global dataList
+    if (dataList == None):
+        varSaveError.set("No file selected")
+        pass
+    else:
     #add the list to a csv file called test
-    try:
-        varSaveError.set("File saved successfully")
-        with open('test1.csv','w', encoding = 'utf8') as csvfile:
-            for i in range(0, x):
-                for counter in range(0, len(list[i])):
-                    csvfile.write(str(list[i][counter]))
-                    #seperate entries by ,
-                    csvfile.write(',')
-                #seperate
-                csvfile.write('\n')
-    except:
-        varSaveError.set("File name currently open please close before saving")
+    
+        try:
+            varSaveError.set("File saved successfully")
+            with open('test1.csv','w', encoding = 'utf8') as csvfile:
+                for i in range(0, x):
+                    for counter in range(0, len(list[i])):
+                        csvfile.write(str(list[i][counter]))
+                        #seperate entries by ,
+                        csvfile.write(',')
+                    #seperate
+                    csvfile.write('\n')
+        except:
+            varSaveError.set("File name currently open please close before saving")
 def selectAll():
     for i in range(len(dataList[0])):       
         varChecked[i].set(1)
