@@ -19,6 +19,8 @@ import getpass
 
 root = Tk()
 root.geometry("500x300")
+root.resizable(width=FALSE,height=FALSE)
+
 
 #strvars
 varImportFile = StringVar()
@@ -26,6 +28,11 @@ varColumnNames = StringVar()
 varFormatTypes = StringVar()
 varImportError = StringVar()
 varSaveError = StringVar()
+
+v1=StringVar()
+
+
+
 varSaveError.set(" ")
 varImportError.set("Please select a valid file type(CSV)")
 varChecked = []
@@ -38,6 +45,7 @@ data = None
 boolCsv = 0
 list = NONE
 x = 0
+emailInfo = []
 
 
 def openFile():
@@ -96,8 +104,7 @@ def clearOptionMenu():
 def test():
     #fp = filedialog.askdirectory()
     print(varFormatTypes.get())
-    pwBox = Entry(frameBottom, show="*", width=15)
-    pwBox.pack()
+    emailPopUp()
     print(len(varChecked))
     #for i in range(len(dataList[0])):       
      #  print(i, " : ", varChecked[i].get())
@@ -150,6 +157,7 @@ def formatData():
                                     pass
                                 elif(state ==2):
                                     temp = (p - 32) * (5/9)
+                                    print(temp)
                                     list[i][x] = str(temp)
                                     pass
                                 else:
@@ -197,13 +205,56 @@ def saveFile():
         except:
             varSaveError.set("File name currently open please close before saving")
 def selectAll():
-    for i in range(len(dataList[0])):       
-        varChecked[i].set(1)
-    pass
+    try:
+        for i in range(len(dataList[0])):       
+            varChecked[i].set(1)
+        pass
+    except:
+        pass
+        
 def deselectAll():
-    for i in range(len(dataList[0])):       
-        varChecked[i].set(0)
+    try:
+        for i in range(len(dataList[0])):       
+            varChecked[i].set(0)
+        pass
+    except:
+        pass
+
+def sendEmail():
+
+    emailInfo.append(v1.get())
+    print(entryEmail.get())
+    print(v1.get())
+
     pass
+def emailPopUp():
+
+    #framePopup = Frame(rootPopup)
+    #framePopup.pack(side=TOP)
+    rootPopup.update()
+    rootPopup.deiconify()
+    rootPopup.geometry("300x200")
+    rootPopup.mainloop()
+
+
+
+#email popup label and entrys
+rootPopup = Tk()
+lblEmail = Label(rootPopup, text="Email:").grid(row=0,column=0)
+lblPw = Label(rootPopup, text="Password:").grid(row=1,column=0)
+lblRec = Label(rootPopup, text="Email Recipient:").grid(row=2,column=0)
+lblSubj = Label(rootPopup, text="Email Subject:").grid(row=3,column=0)
+lblMsg = Label(rootPopup, text="Email Message:").grid(row=4,column=0)
+
+entryEmail = Entry(rootPopup, width=15,textvariable=v1).grid(row=0,column=1)
+entryPw = Entry(rootPopup, width=15).grid(row=1,column=1)
+entryRec = Entry(rootPopup, width=15).grid(row=2,column=1)
+entrySubj = Entry(rootPopup, width=15).grid(row=3,column=1)
+entryMsg = Text(rootPopup, width=20, height=5).grid(row=4,column=1)
+btnSubmit = Button(rootPopup, text = "Send email", command=sendEmail).grid(row=5,column=1)
+rootPopup.withdraw()
+    
+        
 columnNames = [
     "Columns"
     ]
@@ -232,8 +283,12 @@ frameBottom.pack(side=TOP)
 btnImport = Button(topFrame, text = "import", command=openFile)
 btnImport.pack(side = RIGHT)
 
-btnTest = Button(frameBottom, text = "Save", command=saveFile)
+btnSave = Button(frameBottom, text = "Save", command=saveFile)
+btnSave.pack(side=TOP)
+
+btnTest = Button(frameBottom, text = "test", command=test)
 btnTest.pack(side=TOP)
+
 
 btnFormat = Button(frameMiddle, text = "Format", command=formatData)
 btnFormat.pack(side=RIGHT)
@@ -262,6 +317,8 @@ omColumnMenu = OptionMenu(frameMiddle, varColumnNames, *columnNames)
 omFormatMenu = OptionMenu(frameMiddle, varFormatTypes, *formatTypes)
 omFormatMenu.pack(side=RIGHT)
 omColumnMenu.pack(side=RIGHT)
+
+
 
 
 #email the output file
