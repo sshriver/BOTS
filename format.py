@@ -220,39 +220,79 @@ def deselectAll():
     except:
         pass
 
-def sendEmail():
 
-    emailInfo.append(v1.get())
-    print(entryEmail.get())
-    print(v1.get())
 
     pass
 def emailPopUp():
+    def closeEmail():
+        rootPopup.destroy()
 
+    def emailClient():
+        #shouldEmail = input("Would you like to email this file? (Y/N): ")
+        #if (shouldEmail == "Y" or shouldEmail == "y"):
+        email = entryEmail.get()
+        password = entryPw.get()
+        sendEmail = entryRec.get()
+        subject = entrySubj.get()
+        message = entryMsg.get("1.0",END)
+        file_location = os.path.join(sys.path[0], "test2.csv")
+        
+        msg = MIMEMultipart()
+        msg['From'] = email
+        msg['To'] = sendEmail
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(message, 'plain'))
+
+        filename = os.path.basename(file_location)
+        attachment = open(file_location, "rb")
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload((attachment).read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", "attachment; filename= %s" % filename)
+
+        msg.attach(part)
+
+        server = smtplib.SMTP('smtp-mail.outlook.com', 587)
+        server.starttls()
+        server.login(email, password)
+        text = msg.as_string()
+        server.sendmail(email, sendEmail, text)
+        server.quit()
     #framePopup = Frame(rootPopup)
     #framePopup.pack(side=TOP)
+    rootPopup = Tk()
+    lblEmail = Label(rootPopup, text="Email:").grid(row=0,column=0)
+    lblPw = Label(rootPopup, text="Password:").grid(row=1,column=0)
+    lblRec = Label(rootPopup, text="Email Recipient:").grid(row=2,column=0)
+    lblSubj = Label(rootPopup, text="Email Subject:").grid(row=3,column=0)
+    lblMsg = Label(rootPopup, text="Email Message:").grid(row=4,column=0)
+
+    entryEmail = Entry(rootPopup, width=15,textvariable=v1)
+    entryEmail.grid(row=0,column=1)
+    entryPw = Entry(rootPopup, width=15, show="*")
+    entryPw.grid(row=1,column=1)
+    entryRec = Entry(rootPopup, width=15)
+    entryRec.grid(row=2,column=1)
+    entrySubj = Entry(rootPopup, width=15)
+    entrySubj.grid(row=3,column=1)
+    #entryMsg = Text(rootPopup, width=20, height=5)
+    entryMsg = Text(rootPopup,height = 5, width =  20)
+    entryMsg.grid(row=4,column=1)
+
+    btnSubmit = Button(rootPopup, text = "Send email", command=emailClient).grid(row=5,column=1)
+    btnSubmit = Button(rootPopup, text = "Close", command=closeEmail).grid(row=5,column=2)
     rootPopup.update()
     rootPopup.deiconify()
     rootPopup.geometry("300x200")
+    
     rootPopup.mainloop()
 
 
 
-#email popup label and entrys
-rootPopup = Tk()
-lblEmail = Label(rootPopup, text="Email:").grid(row=0,column=0)
-lblPw = Label(rootPopup, text="Password:").grid(row=1,column=0)
-lblRec = Label(rootPopup, text="Email Recipient:").grid(row=2,column=0)
-lblSubj = Label(rootPopup, text="Email Subject:").grid(row=3,column=0)
-lblMsg = Label(rootPopup, text="Email Message:").grid(row=4,column=0)
 
-entryEmail = Entry(rootPopup, width=15,textvariable=v1).grid(row=0,column=1)
-entryPw = Entry(rootPopup, width=15).grid(row=1,column=1)
-entryRec = Entry(rootPopup, width=15).grid(row=2,column=1)
-entrySubj = Entry(rootPopup, width=15).grid(row=3,column=1)
-entryMsg = Text(rootPopup, width=20, height=5).grid(row=4,column=1)
-btnSubmit = Button(rootPopup, text = "Send email", command=sendEmail).grid(row=5,column=1)
-rootPopup.withdraw()
+#email popup label and entrys
+
     
         
 columnNames = [
@@ -286,7 +326,7 @@ btnImport.pack(side = RIGHT)
 btnSave = Button(frameBottom, text = "Save", command=saveFile)
 btnSave.pack(side=TOP)
 
-btnTest = Button(frameBottom, text = "test", command=test)
+btnTest = Button(frameBottom, text = "Email", command=test)
 btnTest.pack(side=TOP)
 
 
@@ -322,36 +362,5 @@ omColumnMenu.pack(side=RIGHT)
 
 
 #email the output file
-def emailClient():
-    shouldEmail = input("Would you like to email this file? (Y/N): ")
-    if (shouldEmail == "Y" or shouldEmail == "y"):
-        email = input("Enter your email address: ")
-        password = getpass.getpass("Enter password: ")
-        sendEmail = input("Enter target email address: ")
-        subject = input("Enter email subject: ")
-        message = input("Enter email message: ")
-        file_location = os.path.join(sys.path[0], "test2.csv")
-        
-        msg = MIMEMultipart()
-        msg['From'] = email
-        msg['To'] = sendEmail
-        msg['Subject'] = subject
 
-        msg.attach(MIMEText(message, 'plain'))
-
-        filename = os.path.basename(file_location)
-        attachment = open(file_location, "rb")
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload((attachment).read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", "attachment; filename= %s" % filename)
-
-        msg.attach(part)
-
-        server = smtplib.SMTP('smtp-mail.outlook.com', 587)
-        server.starttls()
-        server.login(email, password)
-        text = msg.as_string()
-        server.sendmail(email, sendEmail, text)
-    server.quit()
 root.mainloop()
