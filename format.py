@@ -26,6 +26,7 @@ root.resizable(width=FALSE,height=FALSE)
 varImportFile = StringVar()
 varColumnNames = StringVar()
 varFormatTypes = StringVar()
+varNullNames = StringVar()
 varImportError = StringVar()
 varSaveError = StringVar()
 
@@ -37,6 +38,7 @@ varSaveError.set(" ")
 varImportError.set("Please select a valid file type(CSV)")
 varChecked = []
 state = 0
+nullState = 0
 
 
 dataList = None
@@ -47,7 +49,7 @@ list = NONE
 x = 0
 emailInfo = []
 
-
+#function to open file
 def openFile():
     fileName = askopenfilename()
     root.update()
@@ -56,6 +58,7 @@ def openFile():
     fileNameDisplay = os.path.basename(fileName)
     varImportFile.set(fileNameDisplay)
     print(fileNameDisplay[(len(fileNameDisplay)-4): (len(fileNameDisplay))])
+    #if the file is not a CSV file then do not format it.
     if(fileNameDisplay[(len(fileNameDisplay)-4): (len(fileNameDisplay))] != ".csv"):
         varImportError.set("Please select a valid file type(CSV)")
         boolCsv = 0
@@ -135,13 +138,13 @@ def formatData():
                         #state 0 = rounding
                         #state 1 = C to F(temp)
                         #state 2 = F to C(temp)
-
                         try:
                             #check to see if the value is a number or not
                             p = float(p)
                             #if nan(not a number) pass
                             if(math.isnan(p)):
-                                list[i][x] = str(0)
+                                
+                                #list[i][x] = str(0)
                                 pass
                             else:
                                 if(state == 0):                                   
@@ -157,7 +160,6 @@ def formatData():
                                     pass
                                 elif(state ==2):
                                     temp = (p - 32) * (5/9)
-                                    print(temp)
                                     list[i][x] = str(temp)
                                     pass
                                 else:
@@ -172,7 +174,8 @@ def formatData():
         varSaveError.set("File successfully formated")
     except:
         varImportError.set("Please select a valid file type(CSV) first")
-    
+
+#function to get the state for how to format the file
 def returnFile():
     global state
     if(varFormatTypes.get()== "        Round to 2 decimals      "):
@@ -181,7 +184,34 @@ def returnFile():
         state = 1
     elif(varFormatTypes.get() == "         Convert Fahrenheit       "):
         state = 2
-        
+
+#function to get the NULL state to determine what to do with null values.
+def nullFile():
+    global  nullState
+    if(varNullNames.get()== "NULL"):
+        nullState = 0
+    elif(varNullNames.get() == "   0s   "):
+        nullState = 1
+    elif(varNullNames.get() == "Blank"):
+        nullState = 2
+
+
+def nullValue():
+    for i in range(len(dataList)):
+            for x in range(len(dataList[i])):
+                #state 0 = keep it as 0
+                #state 1 = write NULL value
+                #state 2 = keep it blank
+                if(list[i][x] == 'nan'):
+                    if(nullState == 0):
+                        list[i][x] = str('NULL')
+                    elif(nullState == 1):
+                        list[i][x] = str('0')
+                    elif(nullState == 2):
+                        list[i][x] = str('')
+                else:
+                    pass
+#function to save the file
 def saveFile():
     global dataList
     if (dataList == None):
@@ -189,10 +219,12 @@ def saveFile():
         pass
     else:
     #add the list to a csv file called test
+        nullFile()    
     
         try:
             varSaveError.set("File saved successfully")
-            with open('test1.csv','w', encoding = 'utf8') as csvfile:
+            nullValue()
+            with open('filename.csv','w', encoding = 'utf8') as csvfile:
                 for i in range(0, x):
                     for counter in range(0, len(list[i])):
                         csvfile.write(str(list[i][counter]))
@@ -201,9 +233,9 @@ def saveFile():
                     #seperate
                     csvfile.write('\n')
                 csvfile.close()
-            emailClient()
         except:
             varSaveError.set("File name currently open please close before saving")
+#button to select all columns
 def selectAll():
     try:
         for i in range(len(dataList[0])):       
@@ -211,7 +243,8 @@ def selectAll():
         pass
     except:
         pass
-        
+
+#button to deselect all columns    
 def deselectAll():
     try:
         for i in range(len(dataList[0])):       
@@ -223,10 +256,11 @@ def deselectAll():
 
 
     pass
+#the email popup window 
 def emailPopUp():
     def closeEmail():
         rootPopup.destroy()
-
+    
     def emailClient():
         #shouldEmail = input("Would you like to email this file? (Y/N): ")
         #if (shouldEmail == "Y" or shouldEmail == "y"):
@@ -272,7 +306,7 @@ def emailPopUp():
     entryEmail.grid(row=0,column=1)
     entryPw = Entry(rootPopup, width=15, show="*")
     entryPw.grid(row=1,column=1)
-    entryRec = Entry(rootPopup, width=15)
+    entryRec = Entry(rootPopup, width=15) 
     entryRec.grid(row=2,column=1)
     entrySubj = Entry(rootPopup, width=15)
     entrySubj.grid(row=3,column=1)
@@ -294,17 +328,25 @@ def emailPopUp():
 #email popup label and entrys
 
     
-        
+#column names placechold
 columnNames = [
     "Columns"
     ]
+#format types list
 formatTypes = [
     "        Round to 2 decimals      ",
     "Convert Celius to Fahrenheit",
     "Convert Fahrenheit to Celius"
     ]
+#null names list.
+nullNames = [
+    "NULL",
+    "   0s   ",
+    "Blank"
+    ]
 varColumnNames.set(columnNames[0])
 varFormatTypes.set(formatTypes[0])
+varNullNames.set(nullNames[0])
 
 #frames
 topFrame = Frame(root)
@@ -324,10 +366,10 @@ btnImport = Button(topFrame, text = "import", command=openFile)
 btnImport.pack(side = RIGHT)
 
 btnSave = Button(frameBottom, text = "Save", command=saveFile)
-btnSave.pack(side=TOP)
+
 
 btnTest = Button(frameBottom, text = "Email", command=test)
-btnTest.pack(side=TOP)
+
 
 
 btnFormat = Button(frameMiddle, text = "Format", command=formatData)
@@ -355,9 +397,15 @@ omColumnMenu = OptionMenu(frameMiddle, varColumnNames, *columnNames)
 
 
 omFormatMenu = OptionMenu(frameMiddle, varFormatTypes, *formatTypes)
+
+omNullValues = OptionMenu(frameBottom, varNullNames, *nullNames)
+
 omFormatMenu.pack(side=RIGHT)
 omColumnMenu.pack(side=RIGHT)
 
+omNullValues.pack(side=TOP)
+btnSave.pack(side=TOP)
+btnTest.pack(side=TOP)
 
 
 
